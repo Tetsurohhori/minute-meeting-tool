@@ -25,8 +25,13 @@ st.set_page_config(
 
 
 @st.cache_resource(show_spinner="システムを初期化中...")
-def initialize_system():
-    """システムを初期化（キャッシュ）"""
+def initialize_system(_cache_version: str = "v1.1"):
+    """
+    システムを初期化（キャッシュ）
+    
+    Args:
+        _cache_version: キャッシュのバージョン（コード更新時に変更することでキャッシュを無効化）
+    """
     try:
         settings = get_settings()
         
@@ -60,9 +65,9 @@ def initialize_system():
 def main():
     """メインアプリケーション"""
     
-    # システム初期化
+    # システム初期化（キャッシュバージョンを指定）
     try:
-        chat_engine, settings = initialize_system()
+        chat_engine, settings = initialize_system(_cache_version="v1.1")
     except Exception as e:
         st.error(f"システムの初期化に失敗しました: {str(e)}")
         st.info("`.env`ファイルが正しく設定されているか確認してください。")
