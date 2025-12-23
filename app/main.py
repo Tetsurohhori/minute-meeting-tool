@@ -97,8 +97,12 @@ def main():
                                     if metadata and "file_id" in metadata:
                                         unique_file_ids.add(metadata["file_id"])
                                 doc_count = len(unique_file_ids)
-                except Exception:
+                except Exception as e:
                     doc_count = 0
+                    # デバッグ情報（開発環境のみ）
+                    import os
+                    if os.getenv("DEBUG", "false").lower() == "true":
+                        st.exception(e)
                     
         except Exception as e:
             # エラーが発生した場合は0を表示
@@ -106,6 +110,10 @@ def main():
             st.warning(f"ドキュメント数の取得に失敗しました: {str(e)}")
         
         st.metric("📄 登録ドキュメント数", doc_count)
+        
+        # ベクターストアが空の場合の警告
+        if doc_count == 0:
+            st.warning("⚠️ ベクターストアが空です。\n\n`scripts/update_vector_store.py`を実行してドキュメントを登録してください。")
         
         st.markdown("---")
         
