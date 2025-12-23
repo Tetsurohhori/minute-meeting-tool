@@ -85,7 +85,7 @@ class Settings:
         
         # ベクターストア設定（パストラバーサル対策）
         self.vector_store_path = self._validate_and_resolve_path(
-            os.getenv("VECTOR_STORE_PATH", str(PROJECT_ROOT / "data" / "vector_store")),
+            os.getenv("VECTOR_STORE_PATH", str(PROJECT_ROOT / "chroma_db")),
             "VECTOR_STORE_PATH"
         )
         self.metadata_path = self._validate_and_resolve_path(

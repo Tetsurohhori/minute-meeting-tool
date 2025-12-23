@@ -47,6 +47,9 @@ logs/
 test_data/
 test_logs/
 
+# ChromaDB vector store
+chroma_db/
+
 # Test coverage
 .coverage
 .coverage.*
