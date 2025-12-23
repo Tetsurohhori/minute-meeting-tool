@@ -349,4 +349,39 @@ class VectorStoreManager:
             VectorStoreRetriever
         """
         return self.vector_store.as_retriever(search_kwargs={"k": k})
+    
+    def get_document_count(self) -> int:
+        """
+        ベクターストアに登録されているユニークなドキュメント数を取得
+        
+        Returns:
+            ユニークなドキュメント数
+        """
+        try:
+            if self.vector_store is None:
+                return 0
+            
+            # ChromaDBからすべてのメタデータを取得
+            # get()メソッドでメタデータのみを取得（ベクターは取得しない）
+            results = self.vector_store.get()
+            
+            if not results or "metadatas" not in results:
+                return 0
+            
+            metadatas = results["metadatas"]
+            if not metadatas:
+                return 0
+            
+            # ユニークなfile_idをカウント
+            unique_file_ids = set()
+            for metadata in metadatas:
+                if metadata and "file_id" in metadata:
+                    unique_file_ids.add(metadata["file_id"])
+            
+            return len(unique_file_ids)
+            
+        except Exception as e:
+            self.logger.error(f"ドキュメント数の取得エラー: {e}")
+            # エラーが発生した場合は0を返す（アプリケーションがクラッシュしないように）
+            return 0
 

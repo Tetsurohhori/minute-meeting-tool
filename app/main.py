@@ -5,7 +5,6 @@
 import streamlit as st
 from pathlib import Path
 import sys
-import json
 
 # プロジェクトルートをパスに追加
 project_root = Path(__file__).parent.parent
@@ -71,17 +70,15 @@ def main():
     
     # サイドバー
     with st.sidebar:
-        # 登録ドキュメント数（メタデータファイルから直接読み込み）
-        metadata_file = settings.metadata_path / "file_metadata.json"
+        # 登録ドキュメント数（ベクターストアから直接取得）
         try:
-            if metadata_file.exists():
-                with open(metadata_file, 'r', encoding='utf-8') as f:
-                    metadata = json.load(f)
-                    doc_count = len(metadata) if isinstance(metadata, dict) else 0
-            else:
-                doc_count = 0
-        except Exception:
+            # ベクターストアマネージャーを取得
+            vector_store_manager = chat_engine.vector_store_manager
+            doc_count = vector_store_manager.get_document_count()
+        except Exception as e:
+            # エラーが発生した場合は0を表示
             doc_count = 0
+            st.error(f"ドキュメント数の取得に失敗しました: {str(e)}")
         
         st.metric("📄 登録ドキュメント数", doc_count)
         
