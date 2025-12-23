@@ -24,7 +24,7 @@ st.set_page_config(
 )
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner="システムを初期化中...")
 def initialize_system():
     """システムを初期化（キャッシュ）"""
     try:
@@ -74,11 +74,31 @@ def main():
         try:
             # ベクターストアマネージャーを取得
             vector_store_manager = chat_engine.vector_store_manager
-            doc_count = vector_store_manager.get_document_count()
+            
+            # メソッドの存在を確認（Streamlit Cloudのキャッシュ問題に対応）
+            if hasattr(vector_store_manager, 'get_document_count'):
+                doc_count = vector_store_manager.get_document_count()
+            else:
+                # フォールバック: ChromaDBから直接取得を試みる
+                doc_count = 0
+                try:
+                    if vector_store_manager.vector_store is not None:
+                        results = vector_store_manager.vector_store.get()
+                        if results and "metadatas" in results:
+                            metadatas = results["metadatas"]
+                            if metadatas:
+                                unique_file_ids = set()
+                                for metadata in metadatas:
+                                    if metadata and "file_id" in metadata:
+                                        unique_file_ids.add(metadata["file_id"])
+                                doc_count = len(unique_file_ids)
+                except Exception:
+                    doc_count = 0
+                    
         except Exception as e:
             # エラーが発生した場合は0を表示
             doc_count = 0
-            st.error(f"ドキュメント数の取得に失敗しました: {str(e)}")
+            st.warning(f"ドキュメント数の取得に失敗しました: {str(e)}")
         
         st.metric("📄 登録ドキュメント数", doc_count)
         
